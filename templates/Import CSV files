@@ -1,0 +1,18 @@
+import numpy as np
+
+#reading CSV files
+#update the path to your actual file path
+
+import csv
+file_path = "/Users/YourUsername/Downloads/data.csv"
+with open(file_path, "r") as file:
+    reader = csv.reader(file)
+    for row in reader:
+        print(row)
+
+#reading Excel files
+import pandas as pd
+
+file_path = "/Users/YourUsername/Downloads/data.xlsx"
+data = pd.read_excel(file_path)
+print(data)
