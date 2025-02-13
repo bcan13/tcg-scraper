@@ -1,3 +1,4 @@
 nodriver
 pandas
 yagmail
+python-dotenv
