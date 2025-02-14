@@ -34,14 +34,13 @@ def create_subject(company_name, subject_template_path = os.path.join('..', 'tem
     
     return subject
 
-def send_email(recipient_email, recipient_name, subject, body):
+def send_email(recipient_email, recipient_name, subject, body, attachment_path = os.path.join('..', 'templates', 'brochure.pdf')):
 
     yag = authenticate()
 
     if yag:
 
         try:
-            attachment_path = os.path.join('..', 'templates', 'brochure.pdf')
             yag.send(to=recipient_email, subject=subject, contents=body, attachments=attachment_path)
             print(f"Email sent successfully to {recipient_name} ({recipient_email})!")
 
@@ -50,4 +49,4 @@ def send_email(recipient_email, recipient_name, subject, body):
 
 body = create_body("Brian Can", "aathi", "data-driven insights to enhance decision-making", "tcg")
 subject = create_subject("Company Name")
-send_email("canbrian59@gmail.com", "Brian Can", subject, body)
+send_email("aathijmuthu@gmail.com", "Brian Can", subject, body)

@@ -3,6 +3,8 @@ import pandas as pd
 import csv
 import os
 
+# TODO: add location column
+
 
 async def get_jobs_wellfound():
 
@@ -27,6 +29,8 @@ async def get_jobs_wellfound():
         search_url = f"https://wellfound.com/role/l/{job.replace(' ', '-')}/{location.replace(' ', '-')}"
         page = await browser.get(search_url)
         
+        await page.wait_for(selector = '.pl-2.flex.flex-col')
+
         # get company div for each company on each job
         company_div = await page.query_selector_all('.pl-2.flex.flex-col')  # Adjust selectors if needed
         
