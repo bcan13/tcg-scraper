@@ -13,8 +13,8 @@ class EmailClient():
         self.email = os.getenv("EMAIL_USER")
         self.password = os.getenv("EMAIL_PASS")
 
-        self.openai_key = os.getenv("OPENAI_KEY")
-        self.openai_client = openai.OpenAI(api_key=self.openai_key)
+        # self.openai_key = os.getenv("OPENAI_KEY")
+        # self.openai_client = openai.OpenAI(api_key=self.openai_key)
 
         self.body = self.read_template(os.path.join('..', '..', 'templates', 'cold_outreach.txt'))
         self.values = self.read_template(os.path.join('..', '..', 'templates', 'significant_values.txt'))
@@ -38,7 +38,7 @@ class EmailClient():
                 return file.read()
 
         except Exception as e:
-            print(f'Failed to read the email template: {e}')
+            print(f'Failed to read template: {e}')
             return None
         
     # def generate_significant_value(self, company_name: str) -> str:
