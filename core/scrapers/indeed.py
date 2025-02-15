@@ -52,3 +52,7 @@ async def get_jobs_indeed():
         #     await page.wait_for_selector('.job_seen_beacon')  # Wait for the next page of jobs to load
 
     await page.sleep(float('inf'))
+
+    browser.stop()
+
+uc.loop().run_until_complete(get_jobs_indeed())

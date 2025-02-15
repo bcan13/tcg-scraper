@@ -93,6 +93,8 @@ async def get_jobs_wellfound():
     all_companies = pd.DataFrame(all_companies)
     all_companies.to_csv(file_name, mode='a', header=not os.path.exists(file_name), index=False, quoting=csv.QUOTE_ALL)
 
+    browser.stop()
+
     print('done')
 
 uc.loop().run_until_complete(get_jobs_wellfound())
