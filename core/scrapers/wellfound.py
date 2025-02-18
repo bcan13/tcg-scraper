@@ -9,12 +9,13 @@ import os
 
 async def get_jobs_wellfound():
 
-    browser = await uc.start()
+    browser = await uc.start(no_sandbox = True)
     
     # config, will move to config folder soon
     job_titles = ["data science", "software engineer", "machine learning engineer"]
     location = "san diego"
     file_name = 'wellfound_output.csv'
+    max_company_size = 100
     
     # check if file exists, if so, read existing companies
     if os.path.exists(file_name):
@@ -43,6 +44,10 @@ async def get_jobs_wellfound():
             
             # if we already seen the company, continue
             if company_name.text in existing_companies:
+                continue
+
+            # if company size is greater than max_company_size, continue
+            if '+' in company_size.text or int(company_size.text.split('-')[0]) > max_company_size:
                 continue
 
             # store the data for the current company
@@ -75,6 +80,10 @@ async def get_jobs_wellfound():
             
             # if we already seen the company, continue
             if company_name.text in existing_companies:
+                continue
+
+            # if company size is greater than max_company_size, continue
+            if '+' in company_size.text or int(company_size.text.split('-')[0]) > max_company_size:
                 continue
 
             # store the data for the current company
