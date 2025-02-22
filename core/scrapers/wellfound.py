@@ -2,6 +2,12 @@ import nodriver as uc
 import pandas as pd
 import csv
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from utils.parse_link import parse_link
+
 
 # TODO: format better for remote
 # TODO: add a filter for company size
@@ -12,7 +18,7 @@ async def get_jobs_wellfound():
     browser = await uc.start(no_sandbox = True)
     
     # config, will move to config folder soon
-    job_titles = ["data science", "software engineer", "machine learning engineer"]
+    job_titles = ["data science", "software engineer", "machine learning engineer", "artificial intelligence engineer"]
     location = "san diego"
     file_name = 'wellfound_output.csv'
     max_company_size = 100
@@ -58,16 +64,20 @@ async def get_jobs_wellfound():
             company_url = f"https://wellfound.com{company_page.attrs['href']}"
             company_page = await browser.get(company_url, new_tab = True)
 
-            await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
+            if await company_page.find(text = 'Page not found', timeout = 1):
+                await company_page.close()
+                continue
+            else:
+                await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
 
-            company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
-            company_data['website'] = company_website.text if company_website else "N/A"
+                company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
+                company_data['website'] = parse_link(company_website.text) if company_website else "N/A"
 
-            # close the tab
-            await company_page.close()
+                # close the tab
+                await company_page.close()
 
-            # append the company data to the list
-            all_companies.append(company_data)
+                # append the company data to the list
+                all_companies.append(company_data)
 
 
     for job in job_titles:
@@ -108,16 +118,20 @@ async def get_jobs_wellfound():
             company_url = f"https://wellfound.com{company_page.attrs['href']}"
             company_page = await browser.get(company_url, new_tab = True)
 
-            await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
+            if await company_page.find(text = 'Page not found', timeout = 1):
+                await company_page.close()
+                continue
+            else:
+                await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
 
-            company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
-            company_data['website'] = company_website.text if company_website else "N/A"
+                company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
+                company_data['website'] = parse_link(company_website.text) if company_website else "N/A"
 
-            # close the tab
-            await company_page.close()
+                # close the tab
+                await company_page.close()
 
-            # append the company data to the list
-            all_companies.append(company_data)
+                # append the company data to the list
+                all_companies.append(company_data)
 
     # write the data to a csv file
     all_companies = pd.DataFrame(all_companies)
@@ -126,5 +140,7 @@ async def get_jobs_wellfound():
     browser.stop()
 
     print('done')
+
+    return all_companies
 
 uc.loop().run_until_complete(get_jobs_wellfound())
