@@ -16,13 +16,6 @@ async def get_jobs_wellfound():
     location = "san diego"
     file_name = 'wellfound_output.csv'
     max_company_size = 100
-    
-    # check if file exists, if so, read existing companies
-    if os.path.exists(file_name):
-        existing_companies = pd.read_csv(file_name)
-        existing_companies = set(existing_companies['company_name'])
-    else:
-        existing_companies = set()
 
     # list to accumulate all company data
     all_companies = []
@@ -43,8 +36,9 @@ async def get_jobs_wellfound():
             company_desc = await company.query_selector('span.text-xs.text-neutral-1000')
             company_size = await company.query_selector('span.text-xs.italic.text-neutral-500')
             
-            # if we already seen the company, continue
-            if company_name.text in existing_companies:
+            exists = any(company['company_name'] == company_name.text for company in all_companies)
+
+            if exists:
                 continue
 
             # if company size is greater than max_company_size, continue
@@ -69,7 +63,7 @@ async def get_jobs_wellfound():
             company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
             company_data['website'] = company_website.text if company_website else "N/A"
 
-            # Close the tab
+            # close the tab
             await company_page.close()
 
             # append the company data to the list
@@ -93,7 +87,9 @@ async def get_jobs_wellfound():
             company_size = await company.query_selector('span.text-xs.italic.text-neutral-500')
             
             # if we already seen the company, continue
-            if company_name.text in existing_companies:
+            exists = any(company['company_name'] == company_name.text for company in all_companies)
+
+            if exists:
                 continue
 
             # if company size is greater than max_company_size, continue
