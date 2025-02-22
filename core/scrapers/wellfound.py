@@ -38,7 +38,8 @@ async def get_jobs_wellfound():
         company_div = await page.query_selector_all('.pl-2.flex.flex-col')  # Adjust selectors if needed
         
         for company in company_div:
-            company_name = await company.query_selector('h2.inline.text-md.font-semibold')
+            company_page = await company.query_selector('a.text-neutral-1000')
+            company_name = await company_page.query_selector('h2.inline.text-md.font-semibold')
             company_desc = await company.query_selector('span.text-xs.text-neutral-1000')
             company_size = await company.query_selector('span.text-xs.italic.text-neutral-500')
             
@@ -59,6 +60,18 @@ async def get_jobs_wellfound():
                 "location": location
             }
 
+
+            company_url = f"https://wellfound.com{company_page.attrs['href']}"
+            company_page = await browser.get(company_url, new_tab = True)
+
+            await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
+
+            company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
+            company_data['website'] = company_website.text if company_website else "N/A"
+
+            # Close the tab
+            await company_page.close()
+
             # append the company data to the list
             all_companies.append(company_data)
 
@@ -74,7 +87,8 @@ async def get_jobs_wellfound():
         company_div = await page.query_selector_all('.pl-2.flex.flex-col')  # Adjust selectors if needed
         
         for company in company_div:
-            company_name = await company.query_selector('h2.inline.text-md.font-semibold')
+            company_page = await company.query_selector('a.text-neutral-1000')
+            company_name = await company_page.query_selector('h2.inline.text-md.font-semibold')
             company_desc = await company.query_selector('span.text-xs.text-neutral-1000')
             company_size = await company.query_selector('span.text-xs.italic.text-neutral-500')
             
@@ -94,6 +108,17 @@ async def get_jobs_wellfound():
                 "size": company_size.text if company_size else "",
                 "location": "remote"
             }
+
+            company_url = f"https://wellfound.com{company_page.attrs['href']}"
+            company_page = await browser.get(company_url, new_tab = True)
+
+            await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
+
+            company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
+            company_data['website'] = company_website.text if company_website else "N/A"
+
+            # close the tab
+            await company_page.close()
 
             # append the company data to the list
             all_companies.append(company_data)
