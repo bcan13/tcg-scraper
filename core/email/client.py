@@ -7,7 +7,9 @@ import openai
 
 class EmailClient():
 
-    def __init__(self):
+    def __init__(self, our_name):
+
+        self.our_name = our_name
 
         dotenv.load_dotenv()
         self.email = os.getenv("EMAIL_USER")
@@ -90,7 +92,7 @@ class EmailClient():
             print(f'Failed to create subject: {e}')
             return None
         
-    def send_email(self, our_name: str,
+    def send_email(self,
                    recipient_email: str, 
                    recipient_name: str, 
                    company_name: str,
@@ -102,7 +104,7 @@ class EmailClient():
 
 
         try:
-            body = self.create_body(our_name = our_name, 
+            body = self.create_body(our_name = self.our_name, 
                                 recipient_name = recipient_name, 
                                 company_name = company_name)
             subject = self.create_subject(company_name = company_name)
@@ -114,6 +116,6 @@ class EmailClient():
             print(f'Failed to send email: {e}')
             return None
         
-mail = EmailClient()
-mail.send_email(our_name = 'Brian Can', recipient_email = 'canbrian59@gmail.com', recipient_name = 'Jane Doe', company_name = 'nSpire AI')
-mail.send_email(our_name = 'Brian Can', recipient_email = 'briancan6@gmail.com', recipient_name = 'John Doe', company_name = 'Shield AI')
+mail = EmailClient(our_name='Brian Can')
+mail.send_email(recipient_email = 'canbrian59@gmail.com', recipient_name = 'Jane Doe', company_name = 'nSpire AI')
+mail.send_email(recipient_email = 'briancan6@gmail.com', recipient_name = 'John Doe', company_name = 'Shield AI')
