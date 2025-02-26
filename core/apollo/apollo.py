@@ -61,6 +61,4 @@ async def get_apollo_emails(wellfound_output_df):
     await page.sleep(float('inf'))
 
     browser.stop()
-
-df = pd.read_csv(os.path.join('core', 'scrapers', 'wellfound_output.csv'))
-uc.loop().run_until_complete(get_apollo_emails(df))
+    

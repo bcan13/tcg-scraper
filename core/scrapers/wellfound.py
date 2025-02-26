@@ -135,7 +135,7 @@ async def get_jobs_wellfound():
 
     # write the data to a csv file
     all_companies = pd.DataFrame(all_companies)
-    all_companies.to_csv(file_name, mode='w', header=not os.path.exists(file_name), index=False, quoting=csv.QUOTE_ALL)
+    all_companies.to_csv(os.path.join('core', 'scrapers', file_name), mode='w', header=not os.path.exists(file_name), index=False, quoting=csv.QUOTE_ALL)
 
     browser.stop()
 
@@ -143,4 +143,4 @@ async def get_jobs_wellfound():
 
     return all_companies
 
-uc.loop().run_until_complete(get_jobs_wellfound())
+# uc.loop().run_until_complete(get_jobs_wellfound())

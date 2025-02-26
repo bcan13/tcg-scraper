@@ -116,6 +116,6 @@ class EmailClient():
             print(f'Failed to send email: {e}')
             return None
         
-mail = EmailClient(our_name='Brian Can')
-mail.send_email(recipient_email = 'canbrian59@gmail.com', recipient_name = 'Jane Doe', company_name = 'nSpire AI')
-mail.send_email(recipient_email = 'briancan6@gmail.com', recipient_name = 'John Doe', company_name = 'Shield AI')
+# mail = EmailClient(our_name='Brian Can')
+# mail.send_email(recipient_email = 'canbrian59@gmail.com', recipient_name = 'Jane Doe', company_name = 'nSpire AI')
+# mail.send_email(recipient_email = 'briancan6@gmail.com', recipient_name = 'John Doe', company_name = 'Shield AI')
