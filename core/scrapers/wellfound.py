@@ -18,7 +18,7 @@ async def get_jobs_wellfound():
     browser = await uc.start(no_sandbox = True)
     
     # config, will move to config folder soon
-    job_titles = ["data science", "software engineer", "machine learning engineer", "artificial intelligence engineer"]
+    job_titles = ["data science", "software engineer"]
     location = "san diego"
     file_name = 'wellfound_output.csv'
     max_company_size = 100
