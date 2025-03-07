@@ -59,10 +59,9 @@ An app password is a 16-digit passcode that gives a less secure app or device pe
 3. Select Security
 4. Under Signing in to Google, select 2-Step Verification
 5. Select App Passwords
-6. Choose "Mail" as app and "Other" for the device device
-7. Enter a name for the app password
-8. Click Generate
-9. Copy the App Password and paste it as `EMAIL_PASS`
+6.  Enter a name for the app password
+7.  Click Generate
+8.  Copy the App Password and paste it as `EMAIL_PASS`
 ---
 
 ## Code Overciew
