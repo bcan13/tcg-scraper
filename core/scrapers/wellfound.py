@@ -1,3 +1,4 @@
+from core.database.sqlite import add_company_seen, company_seen_before
 import nodriver as uc
 import pandas as pd
 import csv
@@ -20,7 +21,6 @@ async def get_jobs_wellfound():
     # config, will move to config folder soon
     job_titles = ["data science", "software engineer"]
     location = "san diego"
-    file_name = 'wellfound_output.csv'
     max_company_size = 100
 
     # list to accumulate all company data
@@ -42,6 +42,8 @@ async def get_jobs_wellfound():
             company_desc = await company.query_selector('span.text-xs.text-neutral-1000')
             company_size = await company.query_selector('span.text-xs.italic.text-neutral-500')
             
+
+            # if we already seen the company, continue
             exists = any(company['company_name'] == company_name.text for company in all_companies)
 
             if exists:
@@ -49,6 +51,10 @@ async def get_jobs_wellfound():
 
             # if company size is greater than max_company_size, continue
             if '+' in company_size.text or int(company_size.text.split('-')[0]) > max_company_size:
+                continue
+
+            # if we've emailed company before, continue
+            if company_seen_before(company_name.text):
                 continue
 
             # store the data for the current company
@@ -68,10 +74,19 @@ async def get_jobs_wellfound():
                 await company_page.close()
                 continue
             else:
-                await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
+                await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc', timeout = float('inf'))
 
                 company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
                 company_data['website'] = parse_link(company_website.text) if company_website else "N/A"
+
+                add_company_seen(
+                    company_name=company_data['company_name'],
+                    description=company_data['description'],
+                    job_type=company_data['job_type'],
+                    size=company_data['size'],
+                    location=company_data['location'],
+                    website=company_data['website']
+                )
 
                 # close the tab
                 await company_page.close()
@@ -106,6 +121,10 @@ async def get_jobs_wellfound():
             if '+' in company_size.text or int(company_size.text.split('-')[0]) > max_company_size:
                 continue
 
+            # if we've emailed company before, continue
+            if company_seen_before(company_name.text):
+                continue
+
             # store the data for the current company
             company_data = {
                 "company_name": company_name.text if company_name else "",
@@ -122,10 +141,19 @@ async def get_jobs_wellfound():
                 await company_page.close()
                 continue
             else:
-                await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc')
+                await company_page.wait_for(selector = 'button.styles_websiteLink___Rnfc', timeout = float('inf'))
 
                 company_website = await company_page.query_selector('button.styles_websiteLink___Rnfc')
                 company_data['website'] = parse_link(company_website.text) if company_website else "N/A"
+
+                add_company_seen(
+                    company_name=company_data['company_name'],
+                    description=company_data['description'],
+                    job_type=company_data['job_type'],
+                    size=company_data['size'],
+                    location=company_data['location'],
+                    website=company_data['website']
+                )
 
                 # close the tab
                 await company_page.close()
@@ -135,7 +163,6 @@ async def get_jobs_wellfound():
 
     # write the data to a csv file
     all_companies = pd.DataFrame(all_companies)
-    all_companies.to_csv(os.path.join('core', 'scrapers', file_name), mode='w', header=not os.path.exists(file_name), index=False, quoting=csv.QUOTE_ALL)
 
     browser.stop()
 

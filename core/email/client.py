@@ -110,11 +110,11 @@ class EmailClient():
             subject = self.create_subject(company_name = company_name)
 
             self.session.send(to=recipient_email, subject=subject, contents=body, attachments=self.attachment)
-
             print(f'Email sent successfully to {recipient_name} from {company_name} ({recipient_email})!')
+            return True
         except Exception as e:
             print(f'Failed to send email: {e}')
-            return None
+            return False
         
 # mail = EmailClient(our_name='Brian Can')
 # mail.send_email(recipient_email = 'canbrian59@gmail.com', recipient_name = 'Jane Doe', company_name = 'nSpire AI')
