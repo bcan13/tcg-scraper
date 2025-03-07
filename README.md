@@ -46,8 +46,23 @@ mail.send_email(
 Create a .env file with:
 ```python
 EMAIL_USER=your_email@example.com
-EMAIL_PASS=your_email_password
+EMAIL_PASS=your_email_password #use an app password(detailed below)
 ```
+An app password is a 16-digit passcode that gives a less secure app or device permission to access your Google Account(google account help)
+
+**Important**: To create an app password, you need 2-Step Verification on your Google Account.
+
+### Creating and using app passwords
+
+1. Enable 2-Step Verification for your Google Account
+2. Go to your Google Account page
+3. Select Security
+4. Under Signing in to Google, select 2-Step Verification
+5. Select App Passwords
+6. Choose "Mail" as app and "Other" for the device device
+7. Enter a name for the app password
+8. Click Generate
+9. Copy the App Password and paste it as `EMAIL_PASS`
 ---
 
 ## Code Overciew
