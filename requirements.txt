@@ -2,4 +2,3 @@ nodriver
 pandas
 yagmail
 python-dotenv
-openai
