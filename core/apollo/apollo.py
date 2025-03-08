@@ -177,7 +177,7 @@ async def get_apollo_emails(wellfound_output_df: pd.DataFrame) -> pd.DataFrame:
                 f"Removed {initial_count - final_count} companies without contact information"
             )
 
-    except Exception as e:
+    except Exception:
         logger.error("Error during Apollo email retrieval", exc_info=True)
         raise
     finally:

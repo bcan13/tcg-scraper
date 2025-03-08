@@ -1,6 +1,5 @@
 import sys
 import os
-from pathlib import Path
 from typing import List, Dict, Optional
 import pandas as pd
 import nodriver as uc
@@ -245,7 +244,7 @@ class WellfoundScraper:
                 )
                 all_companies.extend(companies)
 
-        except Exception as e:
+        except Exception:
             logger.error("Error during scraping process", exc_info=True)
             raise
         finally:

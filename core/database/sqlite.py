@@ -1,8 +1,7 @@
 import sqlite3
 import datetime
 import os
-import pandas as pd
-from typing import Tuple, Optional, List, Any
+from typing import Tuple
 from contextlib import contextmanager
 
 

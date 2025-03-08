@@ -1,5 +1,4 @@
 import nodriver as uc
-import asyncio
 from core.database.sqlite import add_company_sent
 from core.scrapers.wellfound import get_jobs_wellfound
 from core.apollo.apollo import get_apollo_emails
