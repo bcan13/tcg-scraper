@@ -118,7 +118,7 @@ async def get_jobs_wellfound():
                 all_companies.append(company_data)
 
     for job in job_titles:
-        search_url = f"https://wellfound.com/role/r/{job.replace(' ', '-')}"
+        search_url = f"https://wellfound.com/role/r/{job.replace(' ', '-')}?countryCodes[]=US"        
         page = await browser.get(search_url)
 
         await page.wait_for(selector=".pl-2.flex.flex-col")
