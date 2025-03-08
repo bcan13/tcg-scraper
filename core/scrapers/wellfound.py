@@ -1,14 +1,16 @@
-from core.database.sqlite import add_company_seen, company_seen_before
-import nodriver as uc
-import pandas as pd
-import csv
-import os
 import sys
+import os
+from pathlib import Path
+from typing import List, Dict, Optional
+import pandas as pd
+import nodriver as uc
+from dataclasses import dataclass
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 )
 
+from core.database.sqlite import add_company_seen, company_seen_before
 from utils.parse_link import parse_link
 
 
@@ -16,203 +18,197 @@ from utils.parse_link import parse_link
 # TODO: add a filter for company size
 
 
-async def get_jobs_wellfound():
-    browser = await uc.start(no_sandbox=True)
+@dataclass
+class WellfoundConfig:
+    """Configuration settings for Wellfound scraper."""
 
-    # config, will move to config folder soon
-    job_titles = ["data science", "software engineer"]
-    location = "san diego"
-    max_company_size = 100
+    job_titles: List[str]
+    locations: List[str]
+    max_company_size: int
+    base_url: str = "https://wellfound.com"
 
-    # list to accumulate all company data
-    all_companies = []
 
-    for job in job_titles:
-        search_url = f"https://wellfound.com/role/l/{job.replace(' ', '-')}/{location.replace(' ', '-')}"
-        page = await browser.get(search_url)
+class CompanyScraper:
+    """Handles scraping of company information from Wellfound."""
 
-        await page.wait_for(selector=".pl-2.flex.flex-col")
+    def __init__(self, browser: uc.Browser, config: WellfoundConfig):
+        self.browser = browser
+        self.config = config
 
-        # get company div for each company on each job
-        company_div = await page.query_selector_all(
-            ".pl-2.flex.flex-col"
-        )  # Adjust selectors if needed
-
-        for company in company_div:
-            company_page = await company.query_selector("a.text-neutral-1000")
+    async def _get_company_details(self, company_element) -> Optional[Dict]:
+        """Extract basic company information from a company element."""
+        try:
+            company_page = await company_element.query_selector(
+                "a.text-neutral-1000"
+            )
             company_name = await company_page.query_selector(
                 "h2.inline.text-md.font-semibold"
             )
-            company_desc = await company.query_selector(
+            company_desc = await company_element.query_selector(
                 "span.text-xs.text-neutral-1000"
             )
-            company_size = await company.query_selector(
+            company_size = await company_element.query_selector(
                 "span.text-xs.italic.text-neutral-500"
             )
 
-            # if we already seen the company, continue
-            exists = any(
-                company["company_name"] == company_name.text
-                for company in all_companies
+            if not all([company_name, company_desc, company_size]):
+                return None
+
+            return {
+                "company_name": company_name.text,
+                "description": company_desc.text.strip('"'),
+                "size": company_size.text,
+                "page_url": f"{self.config.base_url}{company_page.attrs['href']}",
+            }
+        except Exception as e:
+            print(f"Error extracting company details: {e}")
+            return None
+
+    async def _get_company_website(self, company_url: str) -> Optional[str]:
+        """Get company website from their profile page."""
+        company_page = await self.browser.get(company_url, new_tab=True)
+
+        try:
+            if await company_page.find(text="Page not found", timeout=1):
+                return None
+
+            await company_page.wait_for(
+                selector="button.styles_websiteLink___Rnfc",
+                timeout=float("inf"),
             )
 
-            if exists:
-                continue
+            website_elem = await company_page.query_selector(
+                "button.styles_websiteLink___Rnfc"
+            )
+            website = parse_link(website_elem.text) if website_elem else None
 
-            # if company size is greater than max_company_size, continue
-            if (
-                "+" in company_size.text
-                or int(company_size.text.split("-")[0]) > max_company_size
-            ):
-                continue
+            return website
+        finally:
+            await company_page.close()
 
-            # if we've emailed company before, continue
-            if company_seen_before(company_name.text):
-                continue
+    def _should_process_company(self, company_data: Dict, size: str) -> bool:
+        """Determine if company should be processed based on criteria."""
+        if (
+            "+" in size
+            or int(size.split("-")[0]) > self.config.max_company_size
+        ):
+            return False
 
-            # store the data for the current company
-            company_data = {
-                "company_name": company_name.text if company_name else "",
-                "description": company_desc.text.strip('"')
-                if company_desc
-                else "",
-                "job_type": job,
-                "size": company_size.text if company_size else "",
-                "location": location,
-            }
+        if company_seen_before(company_data["company_name"]):
+            return False
 
-            company_url = f"https://wellfound.com{company_page.attrs['href']}"
-            company_page = await browser.get(company_url, new_tab=True)
+        return True
 
-            if await company_page.find(text="Page not found", timeout=1):
-                await company_page.close()
-                continue
-            else:
-                await company_page.wait_for(
-                    selector="button.styles_websiteLink___Rnfc",
-                    timeout=float("inf"),
-                )
+    async def _process_company(
+        self, company_element, job_type: str, location: str
+    ) -> Optional[Dict]:
+        """Process a single company element and return its data."""
+        company_data = await self._get_company_details(company_element)
+        if not company_data:
+            return None
 
-                company_website = await company_page.query_selector(
-                    "button.styles_websiteLink___Rnfc"
-                )
-                company_data["website"] = (
-                    parse_link(company_website.text)
-                    if company_website
-                    else "N/A"
-                )
+        if not self._should_process_company(
+            company_data, company_data["size"]
+        ):
+            return None
 
-                add_company_seen(
-                    company_name=company_data["company_name"],
-                    description=company_data["description"],
-                    job_type=company_data["job_type"],
-                    size=company_data["size"],
-                    location=company_data["location"],
-                    website=company_data["website"],
-                )
+        website = await self._get_company_website(company_data["page_url"])
+        if not website:
+            return None
 
-                # close the tab
-                await company_page.close()
+        company_data.update(
+            {"job_type": job_type, "location": location, "website": website}
+        )
 
-                # append the company data to the list
-                all_companies.append(company_data)
+        add_company_seen(
+            company_name=company_data["company_name"],
+            description=company_data["description"],
+            job_type=company_data["job_type"],
+            size=company_data["size"],
+            location=company_data["location"],
+            website=company_data["website"],
+        )
 
-    for job in job_titles:
-        search_url = f"https://wellfound.com/role/r/{job.replace(' ', '-')}?countryCodes[]=US"        
-        page = await browser.get(search_url)
+        return company_data
 
+
+class WellfoundScraper:
+    """Main scraper class for Wellfound job listings."""
+
+    def __init__(self, config: WellfoundConfig):
+        self.config = config
+        self.browser = None
+        self.company_scraper = None
+
+    async def initialize(self):
+        """Initialize browser and company scraper."""
+        self.browser = await uc.start(no_sandbox=True)
+        self.company_scraper = CompanyScraper(self.browser, self.config)
+
+    async def _get_companies_from_page(
+        self, url: str, job_type: str, location: str
+    ) -> List[Dict]:
+        """Get all companies from a single search page."""
+        page = await self.browser.get(url)
         await page.wait_for(selector=".pl-2.flex.flex-col")
 
-        # get company div for each company on each job
-        company_div = await page.query_selector_all(
-            ".pl-2.flex.flex-col"
-        )  # Adjust selectors if needed
+        companies = []
+        company_elements = await page.query_selector_all(".pl-2.flex.flex-col")
 
-        for company in company_div:
-            company_page = await company.query_selector("a.text-neutral-1000")
-            company_name = await company_page.query_selector(
-                "h2.inline.text-md.font-semibold"
+        for company_element in company_elements:
+            company_data = await self.company_scraper._process_company(
+                company_element, job_type, location
             )
-            company_desc = await company.query_selector(
-                "span.text-xs.text-neutral-1000"
-            )
-            company_size = await company.query_selector(
-                "span.text-xs.italic.text-neutral-500"
-            )
+            if company_data:
+                companies.append(company_data)
 
-            # if we already seen the company, continue
-            exists = any(
-                company["company_name"] == company_name.text
-                for company in all_companies
-            )
+        return companies
 
-            if exists:
-                continue
+    def _build_search_url(
+        self, job_title: str, location: Optional[str] = None
+    ) -> str:
+        """Build search URL based on job title and location."""
+        if location:
+            return f"{self.config.base_url}/role/l/{job_title.replace(' ', '-')}/{location.replace(' ', '-')}"
+        return f"{self.config.base_url}/role/r/{job_title.replace(' ', '-')}?countryCodes[]=US"
 
-            # if company size is greater than max_company_size, continue
-            if (
-                "+" in company_size.text
-                or int(company_size.text.split("-")[0]) > max_company_size
-            ):
-                continue
+    async def scrape(self) -> pd.DataFrame:
+        """Main method to scrape all companies based on configuration."""
+        all_companies = []
 
-            # if we've emailed company before, continue
-            if company_seen_before(company_name.text):
-                continue
+        try:
+            # Scrape local jobs
+            for job in self.config.job_titles:
+                for location in self.config.locations:
+                    url = self._build_search_url(job, location)
+                    companies = await self._get_companies_from_page(
+                        url, job, location
+                    )
+                    all_companies.extend(companies)
 
-            # store the data for the current company
-            company_data = {
-                "company_name": company_name.text if company_name else "",
-                "description": company_desc.text.strip('"')
-                if company_desc
-                else "",
-                "job_type": job,
-                "size": company_size.text if company_size else "",
-                "location": "remote",
-            }
-
-            company_url = f"https://wellfound.com{company_page.attrs['href']}"
-            company_page = await browser.get(company_url, new_tab=True)
-
-            if await company_page.find(text="Page not found", timeout=1):
-                await company_page.close()
-                continue
-            else:
-                await company_page.wait_for(
-                    selector="button.styles_websiteLink___Rnfc",
-                    timeout=float("inf"),
+            # Scrape remote jobs
+            for job in self.config.job_titles:
+                url = self._build_search_url(job)
+                companies = await self._get_companies_from_page(
+                    url, job, "remote"
                 )
+                all_companies.extend(companies)
 
-                company_website = await company_page.query_selector(
-                    "button.styles_websiteLink___Rnfc"
-                )
-                company_data["website"] = (
-                    parse_link(company_website.text)
-                    if company_website
-                    else "N/A"
-                )
+        finally:
+            if self.browser:
+                self.browser.stop()
 
-                add_company_seen(
-                    company_name=company_data["company_name"],
-                    description=company_data["description"],
-                    job_type=company_data["job_type"],
-                    size=company_data["size"],
-                    location=company_data["location"],
-                    website=company_data["website"],
-                )
-
-                # close the tab
-                await company_page.close()
-
-                # append the company data to the list
-                all_companies.append(company_data)
-
-    # write the data to a csv file
-    all_companies = pd.DataFrame(all_companies)
-
-    browser.stop()
-
-    return all_companies
+        return pd.DataFrame(all_companies)
 
 
-# uc.loop().run_until_complete(get_jobs_wellfound())
+async def get_jobs_wellfound() -> pd.DataFrame:
+    """Entry point function to get jobs from Wellfound."""
+    config = WellfoundConfig(
+        job_titles=["data science", "software engineer"],
+        locations=["san diego"],
+        max_company_size=100,
+    )
+
+    scraper = WellfoundScraper(config)
+    await scraper.initialize()
+    return await scraper.scrape()
