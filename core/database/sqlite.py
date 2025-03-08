@@ -181,9 +181,3 @@ def company_seen_before(company_name: str) -> bool:
     except Exception as e:
         print(f"Error checking if company seen before: {e}")
         return False
-
-
-# connect_db()
-# df = pd.read_csv(os.path.join('..', '..', 'wellfound_output.csv'))
-# for index, row in df.iterrows():
-#     add_company(contactee_name = "John Doe", status = "Pending", company_name = row['company_name'], description = row['description'], job_type = row['job_type'], size = row['size'], location = row['location'], website = row['website'], email = row['email'])
