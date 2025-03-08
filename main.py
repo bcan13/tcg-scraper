@@ -57,5 +57,6 @@ async def main():
     processor = JobProcessor()
     await processor.process_companies()
 
+
 if __name__ == "__main__":
     uc.loop().run_until_complete(main())
