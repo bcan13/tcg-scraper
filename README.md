@@ -8,6 +8,16 @@ Ensure Python is installed, then install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+
+### Extensions
+[SQLite Database VS Code Extension] (https://marketplace.cursorapi.com/items?itemName=mtxr.sqltools-driver-sqlite); Install to view and edit database
+
+
+## Env file
+
+create a .env file containing environmental variables
+
+
  
 ---
 # Email Automation 
@@ -67,8 +77,9 @@ Stored in templates/:
 ### Environmental Variables
 Create a .env file with:
 ```python
-EMAIL_USER=your_email@example.com
-EMAIL_PASS=your_email_password #use an app password(detailed below)
+EMAIL_USER="your_email@example.com"
+EMAIL_PASS="your_email_password" #use an app password(detailed below)
+CC_EMAIL="CC_email@example.com"#optional
 ```
 An app password is a 16-digit passcode that gives a less secure app or device permission to access your Google Account(google account help)
 
