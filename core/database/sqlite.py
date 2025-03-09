@@ -168,13 +168,9 @@ def company_seen_before(company_name: str) -> bool:
             cursor.execute(
                 """
                 SELECT * FROM companies_seen WHERE company_name = ?
-                UNION
-                SELECT company_name, website, description, job_type, size, location, date_sent 
-                FROM companies_sent WHERE company_name = ?
-            """,
-                (company_name, company_name),
+                """,
+                (company_name,),
             )
-
             result = cursor.fetchone()
             return result is not None
     except Exception as e:

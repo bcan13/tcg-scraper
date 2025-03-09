@@ -51,12 +51,19 @@ class ApolloClient:
     async def _extract_contact_info(self) -> Optional[tuple[str, str]]:
         """Extract name and email from the first person in the search results."""
         try:
-            # Get the first person's container
+            try:
+                # Check for results first since it's more common
+                first_person = await self.page.wait_for(
+                    selector="div.zp_hWv1I", timeout=2
+                )
+            except Exception as e:
+                # No contact found
+                logger.debug("No contact found")
+                return None, None
+
+            # Get all people and select the first one
             first_person = await self.page.query_selector_all("div.zp_hWv1I")
             first_person = first_person[1]
-            if not first_person:
-                logger.warning("No person found in search results")
-                return None, None
 
             # Extract name from first person
             name_elem = await first_person.query_selector(
@@ -66,13 +73,15 @@ class ApolloClient:
 
             # First check for "Access email" button
             get_email = await first_person.query_selector(
-                'button.zp_qe0Li.zp_FG3Vz.zp_QMAFM.zp_h2EIO'
+                "button.zp_qe0Li.zp_FG3Vz.zp_QMAFM.zp_h2EIO"
             )
             if get_email:
                 logger.debug("Found Access email button, clicking it")
                 await get_email.click()
                 # Wait for email to appear after clicking
-                await self.page.wait_for(selector="span.zp_xvo3G.zp_JTaUA", timeout=10)
+                await self.page.wait_for(
+                    selector="span.zp_xvo3G.zp_JTaUA", timeout=10
+                )
 
             # Now try to get the email element (either direct or after clicking)
             try:
@@ -122,14 +131,6 @@ class ApolloClient:
             f"&page=1&qKeywords={company_domain}"
         )
         await self.page.get(url=search_url)
-
-        # Check if results exist
-        if await self.page.find(
-            text="No people match your criteria", timeout=2
-        ):
-            logger.warning(f"No contacts found for domain: {company_domain}")
-            return None, None
-
         return await self._extract_contact_info()
 
     async def close(self) -> None:

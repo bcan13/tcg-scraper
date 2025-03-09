@@ -23,7 +23,6 @@ class EmailTemplate:
     """Container for email template content."""
 
     body: str
-    values: List[str]
     subject: str
     signature_path: Path
     brochure_path: Path
@@ -67,9 +66,6 @@ class TemplateManager:
         try:
             return EmailTemplate(
                 body=self.read_template_file("cold_outreach.txt"),
-                values=self.read_template_file("significant_values.txt").split(
-                    "\n"
-                ),
                 subject=self.read_template_file("subject.txt"),
                 signature_path=self.templates_dir / "signature.jpg",
                 brochure_path=self.templates_dir / "brochure.pdf",
@@ -84,10 +80,6 @@ class EmailContentBuilder:
     def __init__(self, template: EmailTemplate):
         """Initialize content builder with templates."""
         self.template = template
-
-    def get_significant_value(self) -> str:
-        """Get a random significant value from the values template."""
-        return random.choice(self.template.values)
 
     def create_subject(self, company_name: str) -> str:
         """Create email subject line.
@@ -120,11 +112,9 @@ class EmailContentBuilder:
             ValueError: If body creation fails
         """
         try:
-            significant_value = self.get_significant_value()
             body = self.template.body.format(
                 recipient_name=recipient_name,
                 our_name=our_name,
-                significant_value=significant_value,
                 company_name=company_name,
             )
             signature = yagmail.inline(str(self.template.signature_path))
