@@ -184,4 +184,6 @@ async def get_apollo_emails(wellfound_output_df: pd.DataFrame) -> pd.DataFrame:
     finally:
         await client.close()
 
+    wellfound_output_df.dropna()
+
     return wellfound_output_df
