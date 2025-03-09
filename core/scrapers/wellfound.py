@@ -12,7 +12,7 @@ sys.path.append(
 
 from core.database.sqlite import add_company_seen, company_seen_before
 from utils.parse_link import parse_link
-
+from config.config import WELLFOUND_CONFIG
 
 
 # Configure logging
@@ -27,8 +27,6 @@ formatter = logging.Formatter(
 )
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
-
-
 
 
 @dataclass
@@ -193,7 +191,9 @@ class WellfoundScraper:
         """Get all companies from a single search page."""
         logger.info(f"Scraping companies from: {url}")
         page = await self.browser.get(url)
-        await page.wait_for(selector=".pl-2.flex.flex-col", timeout=float("inf"))
+        await page.wait_for(
+            selector=".pl-2.flex.flex-col", timeout=float("inf")
+        )
 
         companies = []
         company_elements = await page.query_selector_all(".pl-2.flex.flex-col")
@@ -262,9 +262,10 @@ async def get_jobs_wellfound() -> pd.DataFrame:
     """Entry point function to get jobs from Wellfound."""
     logger.info("Initializing Wellfound job scraper")
     config = WellfoundConfig(
-        job_titles=["data science", "software engineer"],
-        locations=["san diego"],
-        max_company_size=100,
+        job_titles=WELLFOUND_CONFIG["job_titles"],
+        locations=WELLFOUND_CONFIG["locations"],
+        max_company_size=WELLFOUND_CONFIG["max_company_size"],
+        base_url=WELLFOUND_CONFIG["base_url"],
     )
 
     scraper = WellfoundScraper(config)

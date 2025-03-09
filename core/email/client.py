@@ -5,6 +5,7 @@ import dotenv
 import random
 from typing import Optional, List, Union
 from dataclasses import dataclass
+from config.config import OUR_NAME
 
 
 @dataclass
@@ -139,13 +140,10 @@ class EmailClient:
         self.session = self._create_session()
 
     @staticmethod
-    def from_env(
-        our_name: str, env_path: Optional[str] = None
-    ) -> "EmailClient":
+    def from_env(env_path: Optional[str] = None) -> "EmailClient":
         """Create EmailClient instance from environment variables.
 
         Args:
-            our_name: Sender's name
             env_path: Optional path to .env file
 
         Returns:
@@ -160,7 +158,7 @@ class EmailClient:
             email_user=os.getenv("EMAIL_USER", ""),
             email_password=os.getenv("EMAIL_PASS", ""),
             templates_dir=Path(__file__).parent.parent.parent / "templates",
-            our_name=our_name,
+            our_name=OUR_NAME,
             cc_email=os.getenv("CC_EMAIL"),
         )
         return EmailClient(config)
@@ -176,7 +174,6 @@ class EmailClient:
                 user=self.config.email_user,
                 password=self.config.email_password,
             )
-            print("Authenticated the email sender.")
             return session
         except Exception as e:
             print(f"Failed to authenticate the email sender: {e}")
@@ -220,9 +217,6 @@ class EmailClient:
                 email_args["cc"] = self.config.cc_email
 
             self.session.send(**email_args)
-            print(
-                f"Email sent successfully to {recipient_name} from {company_name} ({recipient_email})!"
-            )
             return True
         except Exception as e:
             print(f"Failed to send email: {e}")
