@@ -1,5 +1,5 @@
 # Outreach Details
-OUR_NAME = "John Doe"  # Replace with your actual name
+OUR_NAME = "Brian Can"  # Replace with your actual name
 
 # Wellfound Filters
 WELLFOUND_CONFIG = {

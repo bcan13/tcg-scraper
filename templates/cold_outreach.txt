@@ -1,6 +1,6 @@
 Hello {recipient_name},
 
-I hope you are doing well! My name is {our_name} and I am reaching out on behalf of Triton Consulting Group (TCG) as the Outreach Lead. Triton Consulting Group is a pro-bono, student-run consultancy at UC San Diego with experience in market research, data analytics, financial advisory, technology implementation, and more. Specifically, we have extensive experience in ML, web development, and data analysis. We are currently looking to support more local businesses as we prepare for new projects this upcoming Winter quarter starting 1/13/2025. 
+I hope you are doing well! My name is {our_name} and I am reaching out on behalf of Triton Consulting Group (TCG) as the Outreach Lead. Triton Consulting Group is a pro-bono, student-run consultancy at UC San Diego with experience in market research, data analytics, financial advisory, technology implementation, and more. Specifically, we have extensive experience in ML, web development, and data analysis. We are currently looking to support more local businesses as we prepare for new projects this upcoming Spring quarter starting 3/31/2025. 
 
 We would love to chat about potential opportunities to collaborate with you and your team. Please feel free to explore our website, www.ucsdtcg.org to learn more about our services and our past clientele. I would be happy to organize a quick chat if you are interested, and can answer any questions via email as well.
 
