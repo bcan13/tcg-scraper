@@ -2,7 +2,6 @@ import yagmail
 import os
 from pathlib import Path
 import dotenv
-import random
 from typing import Optional, List, Union
 from dataclasses import dataclass
 from config.config import OUR_NAME

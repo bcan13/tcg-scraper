@@ -4,7 +4,6 @@ from core.database.sqlite import add_company_sent
 from core.scrapers.wellfound import get_jobs_wellfound
 from core.apollo.apollo import get_apollo_emails
 from core.email.client import EmailClient
-from typing import Optional
 import pandas as pd
 import logging
 from utils.generate_random_yopmail import generate_random_yopmail

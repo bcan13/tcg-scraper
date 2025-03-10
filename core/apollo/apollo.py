@@ -56,7 +56,7 @@ class ApolloClient:
                 first_person = await self.page.wait_for(
                     selector="div.zp_hWv1I", timeout=2
                 )
-            except Exception as e:
+            except Exception:
                 # No contact found
                 logger.debug("No contact found")
                 return None, None
