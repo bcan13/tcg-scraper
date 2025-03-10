@@ -1,190 +1,65 @@
 # Project Overview: TCG Scraper
-A Python-based email scraping and automation tool designed to simply the client aquisition process for TCG. Intergrates job scraping from listings on wellfound, email extraction from Apollo.io, and personalizes email outreach using gmail STMP.
+A Python-based email scraping and automation tool designed to simply the client aquisition process for TCG. Intergrates job scraping from listings on wellfound, email extraction from Apollo.io, and personalizes email outreach using GMAIL/STMP client.
 
-## Installation
-### Prerequisites
+## Setup
+### Dependencies
 Ensure Python is installed, then install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Extensions
-[SQLite Database VS Code Extension] (https://marketplace.cursorapi.com/items?itemName=mtxr.sqltools-driver-sqlite); Install to view and edit database
+
+**SQLite 3 Editor**
+
+![SQLite Extension Image](https://github.com/user-attachments/assets/a98d8d7b-4481-42e3-87be-30ff4273982e)
+
+To view and edit the database file, install and enable [**this VS Code extension**](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-sqlite), and then simply click on the `.db` file.
 
 
-## Env file
+## Authentication
 
-create a .env file containing environmental variables
+### Create an App Password with your Google Account
 
+To authenticate your email login, you must create an app password associated with the Google account you are sending emails from. Below are the steps to do so:
+1. Enable 2-Step Verification for your Google Account.
+2. Visit [**this page**](https://myaccount.google.com/apppasswords).
+3. Enter a name for the app password, this can be anything. We called it "MAIL".
+4. Copy the 16-letter app password and paste it into the '.env' file detailled below.
+   
+### Create an .env file in the root folder
 
- 
----
-# Email Automation 
-
- Uses `yagmail` to send emails and includes dynamic content generation using templates. Easily customizable and can integrate with external APIs.
-
-## Features
-- **Email Sending**: Uses Gmail SMTP for authentication and sending.
-- **Template-Based Content**: Predefined templates for email  body and attachments.
-- **Personalization**: Inserts dynamic values for a customized experience.
-
-
----
-
-## Usage
-
-### EmailClient Class
-
+Below is a snippet of an example .env file, replace each value with your own.
 ```python
-from email_client import EmailClient
-
-mail = EmailClient(our_name='Brian Can')
+EMAIL_USER = "johndoe@example.com"
+EMAIL_PASS = "abcd efgh ijkl mnop"
+CC_EMAIL = "janedoen@example.com" # Optional value if you want to CC another email, otherwise exclude
 ```
 
-### Send Email
-```python
-mail.send_email(
-    recipient_email='janedoe@example.com',
-    recipient_name='Jane Doe',
-    company_name='nSpire AI'
-)
-```
----
+## Configuration
 
-## Code Overciew
+### Edit config.py
 
-### EmailClient Class
-Handles authentication, template reading, content generation, and email sending.
+The configuration file contains the following values:
 
-### Methods:
+- `'OUR NAME' -> str`: The contactee name you wish to use to email contacts
+- `'job_titles' -> List[str]`: A list of strings containing each of the job titles off of Wellfound you want to contact 
+- `'locations' -> List[str]`: A list of strings containing each of the locations off of Wellfound you want to contact
+- `'max_company_size' -> int`: A integer representing the max company size you want to contact
+- `'is_test_mode' -> bool`: A boolean indicating whether or not you want to use test mode, which contacts disposable emails for testing
 
-- `read_template(path: str) -> str`: Reads a template file.
-- - `create_body(recipient_name, our_name, company_name) -> list`: Generates an email body.
-- `create_subject(company_name) -> str:` Generates an email subject.
-- `send_email(recipient_email, recipient_name, company_name) -> bool`: Sends an email.
+### Test Mode
 
-## Templates
+If you are using test mode, the script will contact dispoable emails from [**Yopmail**], an anonymous and temporary inbox.
+This way, you can review the recipient inbox in order to make sure everything is setup and being done correctly. In order to view the recipient inbox:
 
-Stored in templates/:
+1. Visit [**Yopmail**](https://yopmail.com/).
+2. Enter in the username of the testing recipient email whose inbox you want to see. For instance if I sent an email to abcd@yopmail.com, I would enter in "abcd" to view their inbox.
 
-- `cold_outreach.txt`: Email body template.
-- `subject.txt`: Subject template.
-- `signature.jpg`: Email signature image.
-- `brochure.pdf`: Email attachment.
+### Edit Templates
 
-## Config
-### Environmental Variables
-Create a .env file with:
-```python
-EMAIL_USER="your_email@example.com"
-EMAIL_PASS="your_email_password" #use an app password(detailed below)
-CC_EMAIL="CC_email@example.com"#optional
-```
-An app password is a 16-digit passcode that gives a less secure app or device permission to access your Google Account(google account help)
+If you want to change the subject or body template in the future, simply locate the `templates/subject.txt` file or the `templates/cold_outreach.txt` file and edit it.
 
-**Important**: To create an app password, you need 2-Step Verification on your Google Account.
+## Extra Details
 
-### Creating and using app passwords
-
-1. Enable 2-Step Verification for your Google Account
-2. Go to your Google Account page
-3. Select Security
-4. Under Signing in to Google, select 2-Step Verification
-5. Select App Passwords
-6.  Enter a name for the app password
-7.  Click Generate
-8.  Copy the App Password and paste it as `EMAIL_PASS`
----
-
-# Wellfound Job Scraper
-
-Scrapes job listings from Wellfound, extracting company details for specidic job titles and locations. Collects details such as company name, description, job type, size, location, and website. The script uses the `nodriver` library for browser automation and searches SQLite database to track previously seen companies.
-
-
-## Features
-- **Job Scraping**: Finds listings based on job title and location.
-- **Filtering**: Excludes previously seen companies and filters by size limits.
-- **Storage**: Saves data in SQLite and CSV.
-- **Automation**: Uses nodriver for browser automation.
-
-### Usage
-```python
-import asyncio
-from wellfound_scraper import get_jobs_wellfound
-
-asyncio.run(get_jobs_wellfound())
-```
-
-## Code overview
-### Functioality 
-1. Browser Initialization
-- starts browser session using  `nodriver `
-2. Config
-- Defines job titles, location, and maximum company size for filtering
-3. Scraping logic
-- Iterates through each job title and location combination.
-- Navigates to the Wellfound search page for the specified job title and location.
-- Extracts company details (name, description, size, etc.) from the search results.
-- Filters out companies that have been seen before or exceed the maximum size limit.
-- Visits the company's Wellfound page to extract the company website URL.
-
-4. Data Storage
-- Stores the scraped company data in a SQLite database using the add_company_seen function.
-- Accumulates all company data in a list and converts it to a Pandas DataFrame.
-
-### Helper Functions
-`company_seen_before(company_name: str) -> bool`:
-Checks if a company has already been scraped and stored in the database.
-`add_company_seen(company_name: str, description: str, job_type: str, size: str, location: str, website: str)`:
-Adds a new company to the database
-
-
-
----
-# Apollo.io Email Scraper
-
-Extracts verified email addresses and contact names from Apollo.io for companies listed in a dataframe. Uses `nodriver ` for browser automation, search for company dmains, and retrieve verified mail addresses.
-
-### Features
-
-- Email Extraction: Retrieves verified emails.
-- Integration: Works with Wellfound scraper output.
-- Automation: Uses nodriver for seamless extraction.
-
-### Usage
-```python
-import asyncio
-import pandas as pd
-from apollo_scraper import get_apollo_emails
-
-wellfound_output_df = pd.DataFrame({
-    'company_name': ['Example Corp'],
-    'website': ['example.com']
-})
-
-updated_df = asyncio.run(get_apollo_emails(wellfound_output_df))
-print(updated_df)
-```
-
-## Code Overview
-`get_apollo_emails` Function: Logs in to Apollo.io, searches for company domains, and extracts email addresses and contact names for each company.
-
-### Parameters
-`wellfound_output_df (pd.DataFrame)`: DataFrame containing company data(from the Wellfound scraper). 
-
-### Functionality
-1. Browser Initialization:
-- Starts a browser session using nodriver.
-2. Login to Apollo.io:
-- Navigates to the Apollo.io login page and logs in using a pre-configured email.
-3. Email Extraction:
-- Iterates through each row in the input DataFrame.
-- Searches for the company domain on Apollo.io.
-- Checks if verified email addresses are available for the company.
-- Extracts the contact name and email address if available.
-4. Data Update:
-- Updates the input DataFrame with the extracted contact name and email address.
-
-
-
+For more details on this project, including the technology stack and its complete workflow, please visit [**this slideshow**](https://www.canva.com/design/DAGhNtRsvOs/jc7-e9yuTXpoTSUeQp9Rzg/edit?utm_content=DAGhNtRsvOs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
