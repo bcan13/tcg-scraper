@@ -63,3 +63,14 @@ If you want to change the subject or body template in the future, simply locate 
 ## Extra Details
 
 For more details on this project, including the technology stack and its complete workflow, please visit [**this slideshow**](https://www.canva.com/design/DAGhNtRsvOs/jc7-e9yuTXpoTSUeQp9Rzg/edit?utm_content=DAGhNtRsvOs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
+
+## Troubleshooting
+
+```
+--------------------- Failed to connect to browser ---------------------
+One of the causes could be when you are running as root. In that case you
+need to pass no_sandbox=True
+------------------------------------------------------------------------
+```
+
+If you happen to run into the error above, open Google Chrome (if not already open), then immediately after, completely kill Google Chrome (Alt + F4 on Windows, CMD + Q on Mac), and then run the script again.
