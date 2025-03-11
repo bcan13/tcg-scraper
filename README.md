@@ -3,7 +3,7 @@ A Python-based email scraping and automation tool designed to simply the client 
 
 ## Setup
 ### Dependencies
-Ensure Python is installed, then install dependencies:
+Ensure Python and Google Chrome are installed, then install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -50,7 +50,7 @@ The configuration file contains the following values:
 
 ### Test Mode
 
-If you are using test mode, the script will contact dispoable emails from [**Yopmail**], an anonymous and temporary inbox.
+If you are using test mode, the script will contact dispoable emails from **Yopmail**, an anonymous and temporary inbox.
 This way, you can review the recipient inbox in order to make sure everything is setup and being done correctly. In order to view the recipient inbox:
 
 1. Visit [**Yopmail**](https://yopmail.com/).
@@ -61,6 +61,10 @@ This way, you can review the recipient inbox in order to make sure everything is
 If you want to change the subject or body template in the future, simply locate the `templates/subject.txt` file or the `templates/cold_outreach.txt` file and edit it.
 
 ## Extra Details
+
+You may have to solve a Wellfound CAPTCHA at the very beginning of the script, but this will only happen once. 
+
+You also need to sign into Apollo manually for the script to work.
 
 For more details on this project, including the technology stack and its complete workflow, please visit [**this slideshow**](https://www.canva.com/design/DAGhNtRsvOs/jc7-e9yuTXpoTSUeQp9Rzg/edit?utm_content=DAGhNtRsvOs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
 
